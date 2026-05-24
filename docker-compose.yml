@@ -24,6 +24,9 @@ services:
       REDIS_URL: ${REDIS_URL}
       QUEUE_CONCURRENCY: ${QUEUE_CONCURRENCY}
       CORS_ORIGIN: ${CORS_ORIGIN}
+    volumes:
+      - ./app:/app/app
+      - ./scripts:/app/scripts
     networks:
       - job-network
 
@@ -46,6 +49,8 @@ services:
       REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET}
       REDIS_URL: ${REDIS_URL}
       QUEUE_CONCURRENCY: ${QUEUE_CONCURRENCY}
+    volumes:
+      - ./app:/app/app
     networks:
       - job-network
 

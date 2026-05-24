@@ -56,7 +56,8 @@ async def upgrade_to_recruiter(
     result = await auth_service.upgrade_to_recruiter(db, auth["userId"], body)
     set_access_token_cookie(response, result["tokens"]["accessToken"])
     set_refresh_token_cookie(response, result["tokens"]["refreshToken"])
-    return {"message": "Account upgraded to Recruiter successfully"}
+    user_data = await auth_service.get_current_user(db, auth["userId"])
+    return {"user": user_data}
 
 
 # ---------------------------------------------------------------------------
@@ -109,4 +110,5 @@ async def get_me(
     auth: Annotated[dict, Depends(require_auth)],
     db: AsyncSession = Depends(get_db),
 ):
-    return await auth_service.get_current_user(db, auth["userId"])
+    user_data = await auth_service.get_current_user(db, auth["userId"])
+    return {"user": user_data}

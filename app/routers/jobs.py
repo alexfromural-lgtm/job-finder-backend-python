@@ -26,7 +26,16 @@ async def get_all_jobs(
     page_size: int = Query(default=10, ge=1, le=100, alias="pageSize"),
 ):
     """Public: return paginated active jobs with optional filters."""
-    return await job_service.get_all_jobs(db, category, location, search, page, page_size)
+    result = await job_service.get_all_jobs(db, category, location, search, page, page_size)
+    return {
+        "jobs": result["jobs"],
+        "meta": {
+            "total": result["total"],
+            "page": result["page"],
+            "pageSize": result["pageSize"],
+            "totalPages": result["totalPages"],
+        },
+    }
 
 
 @router.get("/recruiter", dependencies=[Depends(authorize_roles("RECRUITER"))])
@@ -45,7 +54,8 @@ async def get_jobs_by_recruiter(
     if not recruiter:
         from app.errors.app_error import AppError
         raise AppError("Recruiter profile not found", 404)
-    return await job_service.get_jobs_by_recruiter(db, recruiter.id)
+    jobs = await job_service.get_jobs_by_recruiter(db, recruiter.id)
+    return {"jobs": jobs}
 
 
 # Must be AFTER /recruiter to avoid wildcard catching it
@@ -56,7 +66,7 @@ async def get_job_by_id(job_id: str, db: AsyncSession = Depends(get_db)):
     job = await job_service.get_job_by_id(db, job_id)
     if not job:
         raise AppError("Job not found", 404)
-    return job
+    return {"job": job}
 
 
 # ---------------------------------------------------------------------------
@@ -80,7 +90,8 @@ async def create_job(
     if not recruiter:
         from app.errors.app_error import AppError
         raise AppError("Recruiter profile not found", 404)
-    return await job_service.create_job(db, recruiter.id, body)
+    job = await job_service.create_job(db, recruiter.id, body)
+    return {"message": "Job created successfully!", "job": job}
 
 
 @router.put("/{job_id}", dependencies=[Depends(authorize_roles("RECRUITER"))])
@@ -100,10 +111,11 @@ async def update_job(
     if not recruiter:
         from app.errors.app_error import AppError
         raise AppError("Recruiter profile not found", 404)
-    return await job_service.update_job(db, job_id, recruiter.id, body)
+    job = await job_service.update_job(db, job_id, recruiter.id, body)
+    return {"message": "Job updated successfully!", "job": job}
 
 
-@router.delete("/{job_id}", status_code=204, dependencies=[Depends(authorize_roles("RECRUITER"))])
+@router.delete("/{job_id}", dependencies=[Depends(authorize_roles("RECRUITER"))])
 async def delete_job(
     job_id: str,
     auth: Annotated[dict, Depends(require_auth)],
@@ -120,3 +132,4 @@ async def delete_job(
         from app.errors.app_error import AppError
         raise AppError("Recruiter profile not found", 404)
     await job_service.delete_job(db, job_id, recruiter.id)
+    return {"message": "Job deleted successfully!"}

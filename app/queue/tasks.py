@@ -34,10 +34,10 @@ def apply_to_job_task(self, user_id: str, job_id: str, cover_letter: Optional[st
             application = await apply_to_job(db, user_id, job_id, cover_letter)
             return {
                 "id": application.id,
-                "jobId": application.job_id,
-                "jobSeekerId": application.job_seeker_id,
+                "job_id": application.job_id,
+                "job_seeker_id": application.job_seeker_id,
                 "status": application.status.value,
-                "createdAt": application.created_at.isoformat(),
+                "created_at": application.created_at.isoformat() if application.created_at else None,
             }
 
     try:
@@ -75,9 +75,9 @@ def save_job_task(self, user_id: str, job_id: str):
             saved = await save_job(db, user_id, job_id)
             return {
                 "id": saved.id,
-                "jobId": saved.job_id,
-                "jobSeekerId": saved.job_seeker_id,
-                "savedAt": saved.saved_at.isoformat(),
+                "job_id": saved.job_id,
+                "job_seeker_id": saved.job_seeker_id,
+                "saved_at": saved.saved_at.isoformat() if saved.saved_at else None,
             }
 
     try:

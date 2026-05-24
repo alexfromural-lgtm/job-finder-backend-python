@@ -16,6 +16,7 @@ from app.middleware.error_handler import (
     integrity_error_handler,
 )
 from app.routers import auth, jobs, jobseeker, queue, recruiter
+from app.utils.camel_response import CamelCaseJSONResponse
 
 # ---------------------------------------------------------------------------
 # Rate limiter (mirrors express-rate-limit in auth.route.ts)
@@ -36,6 +37,8 @@ app = FastAPI(
     title="Job Finder API",
     version="1.0.0",
     description="Job Finder REST API — Python/FastAPI port of the Node.js backend",
+    # Auto-convert all snake_case response keys to camelCase for the React frontend
+    default_response_class=CamelCaseJSONResponse,
     # Disable auto docs in production (optional — comment out if you want Swagger)
     docs_url="/docs" if settings.is_development else None,
     redoc_url="/redoc" if settings.is_development else None,

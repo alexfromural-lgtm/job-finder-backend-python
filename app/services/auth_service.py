@@ -153,8 +153,8 @@ async def get_current_user(db: AsyncSession, user_id: str) -> dict:
         "id": user.id,
         "name": user.name,
         "email": user.email,
-        "roles": user.roles,
-        "isActive": user.is_active,
-        "createdAt": user.created_at.isoformat(),
-        "updatedAt": user.updated_at.isoformat(),
+        "roles": [r.value if hasattr(r, "value") else r for r in user.roles],
+        "is_active": user.is_active,
+        "created_at": user.created_at.isoformat() if user.created_at else None,
+        "updated_at": user.updated_at.isoformat() if user.updated_at else None,
     }

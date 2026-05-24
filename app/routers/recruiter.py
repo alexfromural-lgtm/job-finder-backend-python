@@ -23,7 +23,8 @@ async def get_profile(
     auth: Annotated[dict, Depends(require_auth)],
     db: AsyncSession = Depends(get_db),
 ):
-    return await recruiter_service.get_recruiter_profile(db, auth["userId"])
+    profile = await recruiter_service.get_recruiter_profile(db, auth["userId"])
+    return {"profile": profile}
 
 
 @router.patch("/profile", dependencies=[_REC_AUTH])
@@ -33,7 +34,8 @@ async def update_profile(
     db: AsyncSession = Depends(get_db),
 ):
     data = body.model_dump(exclude_unset=True)
-    return await recruiter_service.update_recruiter_profile(db, auth["userId"], data)
+    profile = await recruiter_service.update_recruiter_profile(db, auth["userId"], data)
+    return {"profile": profile}
 
 
 # ---------------------------------------------------------------------------
@@ -47,7 +49,8 @@ async def get_applications_for_job(
     auth: Annotated[dict, Depends(require_auth)],
     db: AsyncSession = Depends(get_db),
 ):
-    return await recruiter_service.get_applications_for_job(db, auth["userId"], job_id)
+    applications = await recruiter_service.get_applications_for_job(db, auth["userId"], job_id)
+    return {"applications": applications}
 
 
 @router.patch("/applications/{application_id}/status", dependencies=[_REC_AUTH])
@@ -57,6 +60,7 @@ async def update_application_status(
     auth: Annotated[dict, Depends(require_auth)],
     db: AsyncSession = Depends(get_db),
 ):
-    return await recruiter_service.update_application_status(
+    application = await recruiter_service.update_application_status(
         db, auth["userId"], application_id, body.status
     )
+    return {"application": application}
