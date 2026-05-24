@@ -1,0 +1,27 @@
+# Web framework
+fastapi==0.115.12
+uvicorn[standard]==0.34.3
+
+# Database
+sqlalchemy==2.0.41
+alembic==1.15.2
+asyncpg==0.30.0
+
+# Validation & settings
+pydantic[email]==2.11.5
+pydantic-settings==2.9.1
+
+# Auth
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+
+# Queue
+celery[redis]==5.5.2
+redis==5.2.1
+
+# Rate limiting
+slowapi==0.1.9
+
+# Utilities
+python-dotenv==1.1.0
+python-multipart==0.0.20

@@ -1,0 +1,110 @@
+
+services:
+  backend:
+    build: .
+    container_name: job-finder-backend-python
+    restart: unless-stopped
+    ports:
+      - '5002:5002'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      APP_ENV: ${APP_ENV}
+      PORT: ${PORT}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET}
+      REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET}
+      ACCESS_TOKEN_EXPIRES_IN: ${ACCESS_TOKEN_EXPIRES_IN}
+      REFRESH_TOKEN_EXPIRES_IN: ${REFRESH_TOKEN_EXPIRES_IN}
+      REDIS_URL: ${REDIS_URL}
+      QUEUE_CONCURRENCY: ${QUEUE_CONCURRENCY}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+    networks:
+      - job-network
+
+  celery_worker:
+    build: .
+    container_name: job-finder-worker-python
+    restart: unless-stopped
+    command: celery -A app.queue.worker worker --loglevel=info --concurrency=${QUEUE_CONCURRENCY:-5}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      APP_ENV: ${APP_ENV}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET}
+      REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET}
+      REDIS_URL: ${REDIS_URL}
+      QUEUE_CONCURRENCY: ${QUEUE_CONCURRENCY}
+    networks:
+      - job-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: job-finder-db-python
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - job-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: job-finder-pgadmin-python
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    env_file:
+      - .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    depends_on:
+      - postgres
+    networks:
+      - job-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: job-finder-redis-python
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - job-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+networks:
+  job-network:
+    driver: bridge
+
+volumes:
+  pgdata:
