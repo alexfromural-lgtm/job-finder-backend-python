@@ -26,10 +26,9 @@ import app.models  # noqa: E402, F401 — side-effect: registers all models
 target_metadata = Base.metadata
 
 # Override sqlalchemy.url from alembic.ini with the one from pydantic-settings
-# (replaces asyncpg driver with standard psycopg for Alembic sync operations)
 config.set_main_option(
     "sqlalchemy.url",
-    settings.DATABASE_URL.replace("+asyncpg", ""),  # Alembic needs sync URL
+    settings.DATABASE_URL,
 )
 
 

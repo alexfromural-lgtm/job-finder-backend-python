@@ -22,4 +22,4 @@ COPY . .
 EXPOSE 5002
 
 # Entrypoint: run migrations then start uvicorn
-ENTRYPOINT ["/bin/sh", "-c", "bash /app/scripts/docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/app/scripts/docker-entrypoint.sh"]
