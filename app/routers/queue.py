@@ -39,17 +39,8 @@ async def get_queue_job_status(job_id: str):
     result: AsyncResult = AsyncResult(job_id, app=celery_app)
 
     # Celery returns PENDING for both "not found" and "genuinely waiting".
-    # We check the result backend directly to distinguish the two cases.
-    # For unknown IDs the backend has no entry at all.
-    try:
-        backend_key = result.backend.get_key_for_task(job_id)
-        exists = result.backend.get(backend_key) is not None
-    except Exception:
-        # Some backends don't support key lookups — fall through
-        exists = result.state != "PENDING"
-
-    if result.state == "PENDING" and not exists:
-        return JSONResponse(status_code=404, content={"error": "Job not found"})
+    # Since Celery doesn't write PENDING states to the backend on dispatch,
+    # we return a 'waiting' status instead of a 404, so that polling continues.
 
     status = _STATE_MAP.get(result.state, result.state.lower())
 
