@@ -1,3 +1,17 @@
+# =============================================================================
+# app/schemas/recruiter.py  —  RECRUITER SIGNUP & PROFILE SCHEMAS
+# =============================================================================
+# Two schemas:
+#   RecruiterSignupSchema        → POST /api/auth/signup/recruiter
+#                                   and POST /api/auth/upgrade/recruiter
+#   UpdateRecruiterProfileSchema → PATCH /api/recruiter/profile
+#
+# LEARNING NOTE ► RecruiterSignupSchema extends the SignupSchema concept
+#   It includes user credentials (name, email, password) PLUS company info.
+#   This avoids a two-step registration flow where the user first creates
+#   an account and then fills in company details separately.
+# =============================================================================
+
 from typing import Optional
 from pydantic import BaseModel, EmailStr, field_validator
 
@@ -5,13 +19,16 @@ from pydantic import BaseModel, EmailStr, field_validator
 class RecruiterSignupSchema(BaseModel):
     """Mirrors recruiterSignupSchema (recruiter.schema.ts)."""
 
-    name: str
-    email: EmailStr
+    # ── User credentials ──────────────────────────────────────────────────────
+    name:     str
+    email:    EmailStr
     password: str
-    company_name: str
-    company_website: Optional[str] = None
-    description: Optional[str] = None
-    industry: Optional[str] = None
+
+    # ── Company details ───────────────────────────────────────────────────────
+    company_name:    str           # required — must have a company
+    company_website: Optional[str] = None  # e.g. "https://acme.com"
+    description:     Optional[str] = None  # company description
+    industry:        Optional[str] = None  # e.g. "Technology", "Healthcare"
 
     @field_validator("password")
     @classmethod
@@ -31,7 +48,8 @@ class RecruiterSignupSchema(BaseModel):
 class UpdateRecruiterProfileSchema(BaseModel):
     """Mirrors updateRecruiterProfileSchema (recruiter-profile.schema.ts)."""
 
-    company_name: Optional[str] = None
+    # All fields optional for PATCH — update only what you send.
+    company_name:    Optional[str] = None
     company_website: Optional[str] = None
-    description: Optional[str] = None
-    industry: Optional[str] = None
+    description:     Optional[str] = None
+    industry:        Optional[str] = None
