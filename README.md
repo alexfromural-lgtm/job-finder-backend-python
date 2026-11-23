@@ -153,8 +153,26 @@ This creates demo users:
 
 ### 4. Run locally (without Docker)
 
+#### Create & activate virtual environment (`.venv`)
+
+**Windows (PowerShell):**
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+# Note: If PowerShell script execution is restricted, allow it for the current session:
+# Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+```
+
+**macOS / Linux:**
 ```bash
-# Install dependencies
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+#### Install dependencies & run
+
+```bash
+# Install dependencies inside the virtual environment
 pip install -r requirements.txt
 pip install psycopg2-binary   # needed by Alembic
 
